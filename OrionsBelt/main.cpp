@@ -10,112 +10,83 @@
  */
 
 #include <stdlib.h>
-#include <GL/freeglut.h>
+
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
-#define FPS 50
-#define PERIOD (1/50)
-float h, w;
+#include <time.h>
+#include "globals.h"
 
-struct KeyboardState{
-	int w = 0;
-	int s = 0;
-	int a = 0;
-	int d = 0;
-	int spc = 0;
 
-};
+#include "FreeImage/FreeImagePlus.h"
+#include "WorldObject.h"
+#include "main.h"
+#include "TheUniverse.h"
+#include "GameStateMachine.h"
 
-KeyboardState keyboardState;
 
-struct MyShip {
-		float x = 0;
-		float y = 0;
-		float psi = 0;
-		float vx = 0;
-		float vy = 0;
-		float dpsi = 0;
-	};
 
-struct Asteroid {
-	float x = 0;
-	float y = 0;
-	float psi = 0;
-	float vx = 0;
-	float vy = 0;
-	float dpsi = 0;
-};
-
-struct WorldObjects{
-	MyShip myShip;
-	Asteroid* asteroids;
-	int nAsteroids = 0;
-};
-
-WorldObjects theWorld;
-
-void renderShip(float x, float y, float psi){
-
+void renderObjects(void){
 	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	glTranslatef(x,y,0);
-	glRotatef(psi,0,0,1); //rotera kring z-axeln
 
-	glBegin(GL_LINE_LOOP);
-		glColor3f(1.0f, 1.0f, 1.0);
 
-		glVertex2f(0, -10);
-		glVertex2f(40, 0);
-		glVertex2f(0, 10);
-	glEnd();
-
-	glPopMatrix();
-
-}
-
-void renderAsteroids(){
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	for(int i = 0; i<theWorld.nAsteroids;i++){
-		float x = theWorld.asteroids[i].x;
-		float y = theWorld.asteroids[i].y;
-		float psi  = theWorld.asteroids[i].psi;
+	for(int i=0;i<theWorld->nObjects;i++){
+		glPushMatrix();
+		float x = theWorld->worldObjects[i]->x;
+		float y = theWorld->worldObjects[i]->y;
+		float psi  = theWorld->worldObjects[i]->psi;
 		glLoadIdentity();
 		glTranslatef(x,y,0);
 		glRotatef(psi,0,0,1); //rotera kring z-axeln
 
 		glBegin(GL_LINE_LOOP);
-			glColor3f(1.0f, 1.0f, 1.0);
+		glColor3f(1.0f, 1.0f, 1.0);
+		unsigned short tmp = theWorld->worldObjects[i]->nLine;
+		for(unsigned short k=0;k<tmp;k++){
 
-			glVertex2f(0, -30);
-			glVertex2f(40, 0);
-			glVertex2f(65,8);
-			glVertex2f(23,18);
-			glVertex2f(0, 10);
-			glVertex2f(2,3);
+			glVertex2f(theWorld->worldObjects[i]->lineLoop[k]->x,theWorld->worldObjects[i]->lineLoop[k]->y);
+		}
 		glEnd();
-
+		glPopMatrix();
 
 	}
-	glPopMatrix();
+
 }
+
+
 
 void drawDisplay(void){
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	gluOrtho2D(0.0, w, 0.0, h);
+	gluOrtho2D(0.0,GLB::w, 0.0,GLB::h);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	renderShip(theWorld.myShip.x,theWorld.myShip.y,theWorld.myShip.psi);
-	renderAsteroids();
+	/*renderShip(theWorld->myShip.x,theWorld->myShip.y,theWorld->myShip.psi);
+	renderAsteroids();*/
+	renderObjects();
+
+	//glEnable(GL_CULL_FACE);
+	glEnable(GL_TEXTURE_2D);
+	glEnable (GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc (GL_ONE, GL_ONE);
+	//glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	glBegin(GL_QUADS);
+		glColor4f(1,1,1,1.0);
+		glTexCoord2f(0.0, 1.0);glVertex2f(100, 300);//upper left
+		glTexCoord2f(0.0, 0.0); glVertex2f(100, 100);//lower left
+		glTexCoord2f(1.0, 0.0);glVertex2f(300, 100); //lower right
+		glTexCoord2f(1.0, 1.0);glVertex2f(300, 300);///upper right
+
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+
 
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
@@ -125,96 +96,24 @@ void drawDisplay(void){
 
 
 
-	//glFlush();
+	glFlush();
 	glutSwapBuffers();
 }
 
-void changeShipVelocity() {
-	if (keyboardState.w) {
-		theWorld.myShip.vx += cos(theWorld.myShip.psi / 57.3) * 20.0f;
-		theWorld.myShip.vy += sin(theWorld.myShip.psi / 57.3) * 20.0f;
-
-	}
-	if (keyboardState.a) {
-		theWorld.myShip.dpsi += 20;
-
-	}
-	if (keyboardState.d) {
-		theWorld.myShip.dpsi -= 20;
-
-	}
-	if (keyboardState.s) {
-		theWorld.myShip.vx -= cos(theWorld.myShip.psi / 57.3) * 20.0f;
-		theWorld.myShip.vy -= sin(theWorld.myShip.psi / 57.3) * 20.0f;
-
-	}
-	if (keyboardState.spc) {
-		theWorld.myShip.vx *= 0.9;
-		theWorld.myShip.vy *= 0.9;
-		theWorld.myShip.dpsi *= 0.8;
-
-	} else {
-		theWorld.myShip.vx *= 0.98;
-		theWorld.myShip.vy *= 0.98;
-		theWorld.myShip.dpsi *= 0.97;
-	}
 
 
-}
-
-void checkBorders() {
-	if (theWorld.myShip.x > w)
-		theWorld.myShip.x = 0;
-
-	if (theWorld.myShip.y > h)
-		theWorld.myShip.y = 0;
-
-	if (theWorld.myShip.x < 0)
-		theWorld.myShip.x = w;
-
-	if (theWorld.myShip.y < 0)
-		theWorld.myShip.y = h;
-
-	for(int i = 0; i< theWorld.nAsteroids; i++){
-		if (theWorld.asteroids[i].x > w)
-			theWorld.asteroids[i].x = 0;
-
-		if (theWorld.asteroids[i].y > h)
-			theWorld.asteroids[i].y = 0;
-
-		if (theWorld.asteroids[i].x < 0)
-			theWorld.asteroids[i].x = w;
-
-		if (theWorld.asteroids[i].y < 0)
-			theWorld.asteroids[i].y = h;
-
-	}
-
-}
-
-void changeShipPosition() {
-	theWorld.myShip.x += theWorld.myShip.vx / FPS;
-	theWorld.myShip.y += theWorld.myShip.vy / FPS;
-	theWorld.myShip.psi += theWorld.myShip.dpsi / FPS;
-}
 
 void updateFrame(int data){
 	glutTimerFunc(1000/FPS,updateFrame,0);
 
-	changeShipVelocity();
-	changeShipPosition();
-
-	for(int i = 0; i< theWorld.nAsteroids;i++){
-		theWorld.asteroids[i].x += theWorld.asteroids[i].vx/FPS;
-		theWorld.asteroids[i].y += theWorld.asteroids[i].vy/FPS;
-		theWorld.asteroids[i].psi += theWorld.asteroids[i].dpsi/FPS;
-	}
-
-	checkBorders();
+	gameStateMachine.UpdateStates();
 
 	glutPostRedisplay();
 
 }
+
+
+
 
 void keyboardFunc(unsigned char key, int x, int y){
 	switch(key){
@@ -262,6 +161,7 @@ void keyboardUpFunc(unsigned char key, int x, int y){
 
 int main(int argc, char **argv)
 {
+	srand(time(NULL));
 // Init glut and create window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -274,26 +174,34 @@ int main(int argc, char **argv)
 	// Set the viewport to be the entire window
 	glViewport(0, 0, glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));
 	// Set the correct perspective.
-	gluOrtho2D(0.0, w, 0.0, h);
+	gluOrtho2D(0.0,GLB::w, 0.0,GLB::h);
 	//glDisableClientState( GL_VERTEX_ARRAY );
-	w = glutGet(GLUT_SCREEN_WIDTH);
-	h = glutGet(GLUT_SCREEN_HEIGHT);
+	GLB::w = glutGet(GLUT_SCREEN_WIDTH);
+	GLB::h = glutGet(GLUT_SCREEN_HEIGHT);
 
-	// Set glut and opengl options:
-	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_GLUTMAINLOOP_RETURNS);
-	glEnable(GL_DEPTH_TEST);
+	if(GLB::w==3600)
+		GLB::w=1920;
 
-	//
-	theWorld.myShip.vx = 100;
-	theWorld.myShip.vy = 50;
 
-	theWorld.asteroids = (Asteroid*)calloc(sizeof(Asteroid),100);
-	theWorld.asteroids[0].x = 300;
-	theWorld.asteroids[0].y = 555;
-	theWorld.asteroids[0].vx = 45;
-	theWorld.asteroids[0].vy = 11;
-	theWorld.asteroids[0].dpsi = 123;
-	theWorld.nAsteroids = 1;
+	GLuint tempTextureID;
+	glGenTextures(1, &tempTextureID);
+	glBindTexture(GL_TEXTURE_2D, tempTextureID);
+	fipImage* texImg = new fipImage();
+	texImg->load("./died.png");
+
+    int width = texImg->getWidth();
+    int height= texImg->getHeight();
+    printf("kk %d\n",width);
+    BYTE* bDataPtr = texImg->accessPixels();
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA, width, height,0,GL_RGBA,GL_UNSIGNED_BYTE,bDataPtr);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glActiveTexture(tempTextureID);
+
+
 
 	glutKeyboardUpFunc(keyboardUpFunc);
 	glutKeyboardFunc(keyboardFunc);
