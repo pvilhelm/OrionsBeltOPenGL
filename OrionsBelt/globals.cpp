@@ -7,6 +7,8 @@ namespace GLB{
 	int h;
 }
 
+GfxStateMachine gfxStateMachine;
 KeyboardState keyboardState;
 TheUniverse* theWorld;
 GameStateMachine gameStateMachine;
+

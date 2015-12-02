@@ -14,6 +14,9 @@
 
 void changeShipVelocity() {
 	MyShip *myShip = theWorld->GetMyShip();
+	if(myShip == NULL)
+		return;
+
 	if (keyboardState.w) {
 		myShip->vx += cos(myShip->psi / 57.3) * 20.0f;
 		myShip->vy += sin(myShip->psi / 57.3) * 20.0f;
@@ -81,6 +84,9 @@ void changeObjectPosition(){
 }
 
 int checkCollision(WorldObject* worldObject){
+	if (worldObject == NULL)
+		return 0;
+
 	Vector* p0 = (Vector*)&(worldObject->x);
 	for(int i=0;i<theWorld->nObjects;i++){
 		if(worldObject == theWorld->worldObjects[i])
@@ -103,6 +109,8 @@ int checkFineCollision(WorldObject* worldObject){
 GameStateMachine::GameStateMachine() {
 	// TODO Auto-generated constructor stub
 
+	theWorld = new TheUniverse();
+
 }
 
 GameStateMachine::~GameStateMachine() {
@@ -111,27 +119,33 @@ GameStateMachine::~GameStateMachine() {
 
 void GameStateMachine::UpdateStates() {
 
-	if(!isLive){
-		if(!theWorld)
-			theWorld = new TheUniverse();
+	if((!isLive) & keyboardState.spc  ){
+		theWorld->~TheUniverse();
+		theWorld = new TheUniverse();
 		theWorld->AddMyShip();
 		for(int i=0;i<4;i++)
 			theWorld->AddObject(new Asteroid());
 		isLive = true;
+		gfxStateMachine.SetGamestate(PLAYING);
 	}
 
-	changeShipVelocity();
-	changeObjectPosition();
 
+	changeObjectPosition();
 	checkBorders();
-	if(checkCollision(theWorld->GetMyShip()))
-		KillGame();
+
+	if(isLive){
+		changeShipVelocity();
+		if(checkCollision(theWorld->GetMyShip())){
+			KillGame();
+		}
+	}
 }
 
 void GameStateMachine::KillGame() {
+	MyShip* myShip = theWorld->GetMyShip();
+	myShip->Kill();
 	isLive = false;
-	theWorld->~TheUniverse();
-	theWorld = new TheUniverse();
+	gfxStateMachine.SetGamestate(DEAD);
 }
 
 

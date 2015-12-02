@@ -42,6 +42,7 @@
 								</option>
 								<option id="nvcc.linker.option.paths.1841931250" name="Library search path (-L)" superClass="nvcc.linker.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/home/tomatsoppa/git/OrionsBeltOpenGL/OrionsBelt/FreeImage"/>
+									<listOptionValue builtIn="false" value="/home/potatissoppa/git/OrionsBeltOpenGL/OrionsBelt/FreeImage"/>
 								</option>
 								<inputType id="nvcc.linker.input.1233502464" superClass="nvcc.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

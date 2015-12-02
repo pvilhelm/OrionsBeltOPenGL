@@ -18,6 +18,7 @@ public:
 	WorldObject();
 	virtual ~WorldObject();
 	void SetGeometry(GLfloat* points, int nPointPairs);
+
 	int objType;
 	float x;
 	float y;
@@ -42,6 +43,7 @@ class MyShip: public WorldObject {
 
 	public:
 		MyShip();
+		void Kill();
 	};
 
 class Asteroid: public WorldObject {

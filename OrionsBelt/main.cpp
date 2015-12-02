@@ -10,12 +10,11 @@
  */
 
 #include <stdlib.h>
-
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
 #include <time.h>
-#include "globals.h"
+
 
 
 #include "FreeImage/FreeImagePlus.h"
@@ -23,35 +22,10 @@
 #include "main.h"
 #include "TheUniverse.h"
 #include "GameStateMachine.h"
+#include "GfxStateMachine.h"
 
+#include "globals.h"
 
-
-void renderObjects(void){
-	glMatrixMode(GL_MODELVIEW);
-
-
-	for(int i=0;i<theWorld->nObjects;i++){
-		glPushMatrix();
-		float x = theWorld->worldObjects[i]->x;
-		float y = theWorld->worldObjects[i]->y;
-		float psi  = theWorld->worldObjects[i]->psi;
-		glLoadIdentity();
-		glTranslatef(x,y,0);
-		glRotatef(psi,0,0,1); //rotera kring z-axeln
-
-		glBegin(GL_LINE_LOOP);
-		glColor3f(1.0f, 1.0f, 1.0);
-		unsigned short tmp = theWorld->worldObjects[i]->nLine;
-		for(unsigned short k=0;k<tmp;k++){
-
-			glVertex2f(theWorld->worldObjects[i]->lineLoop[k]->x,theWorld->worldObjects[i]->lineLoop[k]->y);
-		}
-		glEnd();
-		glPopMatrix();
-
-	}
-
-}
 
 
 
@@ -68,32 +42,14 @@ void drawDisplay(void){
 
 	/*renderShip(theWorld->myShip.x,theWorld->myShip.y,theWorld->myShip.psi);
 	renderAsteroids();*/
-	renderObjects();
+	gfxStateMachine.Render();
 
 	//glEnable(GL_CULL_FACE);
-	glEnable(GL_TEXTURE_2D);
-	glEnable (GL_BLEND);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendFunc (GL_ONE, GL_ONE);
-	//glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-	//glClear(GL_COLOR_BUFFER_BIT);
-	glBegin(GL_QUADS);
-		glColor4f(1,1,1,1.0);
-		glTexCoord2f(0.0, 1.0);glVertex2f(100, 300);//upper left
-		glTexCoord2f(0.0, 0.0); glVertex2f(100, 100);//lower left
-		glTexCoord2f(1.0, 0.0);glVertex2f(300, 100); //lower right
-		glTexCoord2f(1.0, 1.0);glVertex2f(300, 300);///upper right
-
-	glEnd();
-	glDisable(GL_TEXTURE_2D);
-
 
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
-	//glEnable(GL_TEXTURE_2D);
-
 
 
 	glFlush();
@@ -163,24 +119,7 @@ int main(int argc, char **argv)
 {
 	srand(time(NULL));
 // Init glut and create window
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(0,0);
-	glutInitWindowSize(1000,1000);
-	glutCreateWindow("Orion's Belt");
-	glutFullScreen();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	// Set the viewport to be the entire window
-	glViewport(0, 0, glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));
-	// Set the correct perspective.
-	gluOrtho2D(0.0,GLB::w, 0.0,GLB::h);
-	//glDisableClientState( GL_VERTEX_ARRAY );
-	GLB::w = glutGet(GLUT_SCREEN_WIDTH);
-	GLB::h = glutGet(GLUT_SCREEN_HEIGHT);
-
-	if(GLB::w==3600)
-		GLB::w=1920;
+	gfxStateMachine.InitGlut(argc,argv);
 
 
 	GLuint tempTextureID;

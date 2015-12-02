@@ -42,6 +42,16 @@ WorldObject::~WorldObject() {
 		delete this->lineLoop[i];
 	}
 	delete this->lineLoop;
+
+	for(int i=0;i<theWorld->nObjects;i++){
+		WorldObject* worldObject = theWorld->worldObjects[i];
+		if(this == worldObject){
+			theWorld->worldObjects[i] = theWorld->worldObjects[--theWorld->nObjects];
+
+			break;
+		}
+
+	}
 }
 
 Asteroid::Asteroid(){
@@ -76,4 +86,6 @@ MyShip::MyShip(){
 }
 
 
-
+void MyShip::Kill() {
+	this->~WorldObject();
+}
