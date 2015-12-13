@@ -12,8 +12,7 @@
 
 
 
-#define TYPE_MYSHIP 1
-#define TYPE_ASTEROID 2
+
 
 struct KeyboardState{
 	int w = 0;
@@ -21,7 +20,7 @@ struct KeyboardState{
 	int a = 0;
 	int d = 0;
 	int spc = 0;
-
+	int ent = 0;
 };
 
 class Point {

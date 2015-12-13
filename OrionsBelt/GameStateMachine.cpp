@@ -52,6 +52,9 @@ void changeShipVelocity() {
 void checkBorders() {
 
 	for(int i = 0; i< theWorld->nObjects; i++){
+		if(theWorld->worldObjects[i]->objType == TYPE_BULLET)
+			continue;
+
 		if (theWorld->worldObjects[i]->x >GLB::w)
 			theWorld->worldObjects[i]->x = 0;
 
@@ -117,6 +120,13 @@ GameStateMachine::~GameStateMachine() {
 	// TODO Auto-generated destructor stub
 }
 
+void GameStateMachine::UpdateObjects(){
+	MyShip* myShip = theWorld->GetMyShip();
+	if(myShip!=NULL & keyboardState.ent)
+		myShip->FireBullet();
+
+}
+
 void GameStateMachine::UpdateStates() {
 
 	if((!isLive) & keyboardState.spc  ){
@@ -133,8 +143,10 @@ void GameStateMachine::UpdateStates() {
 	changeObjectPosition();
 	checkBorders();
 
+
 	if(isLive){
 		changeShipVelocity();
+		UpdateObjects();
 		if(checkCollision(theWorld->GetMyShip())){
 			KillGame();
 		}

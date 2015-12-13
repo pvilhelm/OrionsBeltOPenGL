@@ -13,22 +13,9 @@
 #define RANDZM(x) (rand()%x-x/2)
 
 
-WorldObject::WorldObject(float x,float y,float psi,float vx,float vy,float dpsi){
-			this->x = x;
-			this->y = y;
-			this->psi = psi;
-			this->vx = vx;
-			this->vx = vy;
-			this->dpsi = dpsi;
-}
+
 
 WorldObject::WorldObject() {
-			this->x = 0;
-			this->y = 0;
-			this->psi = 0;
-			this->vx = 0;
-			this->vx = 0;
-			this->dpsi = 0;
 }
 
 void WorldObject::SetGeometry(GLfloat* points, int nPointPairs){
@@ -73,6 +60,7 @@ Asteroid::Asteroid(){
 	this->dpsi = +RANDZM(50);
 	objType = TYPE_ASTEROID;
 	colRad = 55;
+	plyType = LINE_LOOP;
 }
 
 MyShip::MyShip(){
@@ -83,9 +71,32 @@ MyShip::MyShip(){
 	this->nLine = 3;
 	this->objType = TYPE_MYSHIP;
 	colRad = 30;
+	plyType = LINE_LOOP;
 }
 
 
 void MyShip::Kill() {
 	this->~WorldObject();
+}
+
+Bullet::Bullet(WorldObject* parent) {
+	this->objType = TYPE_BULLET;
+	this->lineLoop = new Vector*[1];
+	this->lineLoop[0] = new Vector(0,0);
+	this->nLine = 1;
+	this->x = parent->x+cos(parent->psi/57.3)*100;
+	this->y = parent->y+sin(parent->psi/57.3)*100;
+	this->vx = parent->vx+700*cos(parent->psi/57.3);
+	this->vy = parent->vy+700*sin(parent->psi/57.3);
+	plyType = VERTEX;
+	colRad = 1;
+	psi = 0;
+}
+
+Explosion::Explosion(Point start, WorldObject parent) {
+
+}
+
+void MyShip::FireBullet() {
+	theWorld->AddObject(new Bullet(theWorld->myShip));
 }

@@ -50,26 +50,46 @@ void GfxStateMachine::RenderObjects(void){
 
 
 
+
+
 	for(int i=0;i<theWorld->nObjects;i++){
 		glPushMatrix();
 		float x = theWorld->worldObjects[i]->x;
 		float y = theWorld->worldObjects[i]->y;
-		float psi  = theWorld->worldObjects[i]->psi;
-		glLoadIdentity();
-		glTranslatef(x,y,0);
-		glRotatef(psi,0,0,1); //rotera kring z-axeln
 
-		glBegin(GL_LINE_LOOP);
-		glColor3f(1.0f, 1.0f, 1.0);
-		unsigned short tmp = theWorld->worldObjects[i]->nLine;
-		for(unsigned short k=0;k<tmp;k++){
+		if(theWorld->worldObjects[i]->plyType==LINE_LOOP){
 
-			glVertex2f(theWorld->worldObjects[i]->lineLoop[k]->x,theWorld->worldObjects[i]->lineLoop[k]->y);
+			float psi  = theWorld->worldObjects[i]->psi;
+			glLoadIdentity();
+			glTranslatef(x,y,0);
+			glRotatef(psi,0,0,1); //rotera kring z-axeln
+
+			glBegin(GL_LINE_LOOP);
+			glColor3f(1.0f, 1.0f, 1.0);
+			unsigned short tmp = theWorld->worldObjects[i]->nLine;
+			for(unsigned short k=0;k<tmp;k++){
+
+				glVertex2f(theWorld->worldObjects[i]->lineLoop[k]->x,theWorld->worldObjects[i]->lineLoop[k]->y);
+			}
+			glEnd();
 		}
-		glEnd();
+		else{
+			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glLoadIdentity();
+
+			glTranslatef(x,y,0);
+			glColor3f(1.0f, 1.0f, 1.0);
+			glPointSize(2.0f);
+			glBegin(GL_POINTS);
+				glVertex2f(theWorld->worldObjects[i]->lineLoop[0]->x,theWorld->worldObjects[i]->lineLoop[0]->y);
+			glEnd();
+
+		}
+
 		glPopMatrix();
 
 	}
+
 
 }
 
@@ -93,10 +113,9 @@ void GfxStateMachine::RenderDeadScreen() {
 		glBegin(GL_QUADS);
 		glColor4f(1,1,1,1.0);
 		glTexCoord2f(0.0, 1.0);glVertex2f(GLB::w*0.4, GLB::h*0.5+GLB::w*0.1);//upper left
-		glTexCoord2f(0.0, 0.0); glVertex2f(GLB::w*0.4,  GLB::h*0.5-GLB::w*0.1);//lower left
+		glTexCoord2f(0.0, 0.0);glVertex2f(GLB::w*0.4, GLB::h*0.5-GLB::w*0.1);//lower left
 		glTexCoord2f(1.0, 0.0);glVertex2f(GLB::w*0.6, GLB::h*0.5-GLB::w*0.1); //lower right
 		glTexCoord2f(1.0, 1.0);glVertex2f(GLB::w*0.6, GLB::h*0.5+GLB::w*0.1);///upper right
-
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();

@@ -15,6 +15,7 @@ public:
 	bool isLive = false;
 	void UpdateStates();
 	void KillGame();
+	void UpdateObjects();
 };
 
 #endif /* GAMESTATEMACHINE_H_ */

@@ -88,6 +88,9 @@ void keyboardFunc(unsigned char key, int x, int y){
 		case ' ':
 			keyboardState.spc = 1;
 			break;
+		case 0x0D:
+			keyboardState.ent = 1;
+			break;
 		default:
 			break;
 		}
@@ -109,6 +112,9 @@ void keyboardUpFunc(unsigned char key, int x, int y){
 			break;
 		case ' ':
 			keyboardState.spc = 0;
+			break;
+		case 0x0D:
+			keyboardState.ent = 0;
 			break;
 		default:
 			break;

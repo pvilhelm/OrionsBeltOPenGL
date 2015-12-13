@@ -8,7 +8,7 @@
 #include "TheUniverse.h"
 
 TheUniverse::TheUniverse(){
-	worldObjects = new WorldObject*[100];
+	worldObjects = new WorldObject*[10000];
 }
 
 TheUniverse::~TheUniverse() {
